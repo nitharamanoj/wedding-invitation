@@ -72,6 +72,7 @@ img {
 .card-frame {
   width: min(100vw, calc(100vh * 9 / 16), 480px);
   height: 100vh;
+  height: 100dvh;
   position: relative;
   overflow-y: scroll;
   overflow-x: hidden;
@@ -148,6 +149,7 @@ section {
   transform: translate(-50%, -50%);
   width: min(100vw, calc(100vh * 9 / 16), 480px);
   height: 100vh;
+  height: 100dvh;
   z-index: 1000;
   display: flex;
   flex-direction: column;
@@ -457,7 +459,7 @@ section {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 1.1rem 1.6rem;
+  padding: calc(1.1rem + env(safe-area-inset-top, 0px)) 1.6rem 1.1rem;
   background-color: transparent;
   border-bottom: 1px solid transparent;
   transition: all 0.4s ease;
