@@ -448,44 +448,146 @@
   }
 
   /* -------------------------------------------------------------
-     Guest Wishes Form Logic
+     Guest Wishes Backend & UI Logic
      ------------------------------------------------------------- */
   function initWishes() {
     const form = document.querySelector(selectors.wishesForm);
     const successState = document.querySelector(selectors.wishesSuccess);
     const wandBtn = document.querySelector(selectors.wishesWandBtn);
     const wishesDisplay = document.getElementById("wishesDisplay");
+    const loadMoreBtn = document.getElementById("loadMoreWishesBtn");
+    const loadMoreContainer = document.getElementById("loadMoreContainer");
 
-    function renderWishes() {
-      if (!wishesDisplay) return;
-      
-      const wishes = JSON.parse(localStorage.getItem("wedding-wishes") || "[]");
-      
-      if (wishes.length === 0) {
-        wishesDisplay.innerHTML = "";
-        return;
+    const PAGE_SIZE = 5;
+    let allWishes = [];
+    let displayedCount = 0;
+    let previousTotalWishes = 0;
+
+    // ----- FIREBASE / MOCK BACKEND LOGIC -----
+    // Replace with your real Firebase config object
+    const firebaseConfig = {
+      apiKey: "YOUR_API_KEY_HERE",
+      projectId: "your-project",
+      // ...
+    };
+
+    // We use a mock backend backed by localStorage if the API key isn't set
+    const isMock = firebaseConfig.apiKey === "YOUR_API_KEY_HERE";
+    
+    // For live top-stacking, we trigger an event when data changes locally
+    const WISHES_STORAGE_KEY = "wedding-wishes-db";
+
+    function fetchWishesFromDB() {
+      if (isMock) {
+        return JSON.parse(localStorage.getItem(WISHES_STORAGE_KEY) || "[]");
       }
-      
-      // Get the last 5 wishes, newest first
-      const latestWishes = wishes.slice(-5).reverse();
-      
-      wishesDisplay.innerHTML = latestWishes.map(wish => {
-        const escapedName = wish.name.replace(/[&<>'"]/g, t => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[t] || t));
-        const escapedMsg = wish.message.replace(/[&<>'"]/g, t => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[t] || t));
-        const d = new Date(wish.sentAt);
-        const dateStr = isNaN(d) ? "" : d.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
-        
-        return `<div class="wish-item">
-          <div class="wish-item-header">
-            <span class="wish-item-name">${escapedName}</span>
-            <span class="wish-item-date">${dateStr}</span>
-          </div>
-          <div class="wish-item-message">${escapedMsg}</div>
-        </div>`;
-      }).join("");
+      // Real firebase query would go here
+      return [];
     }
 
-    renderWishes();
+    function saveWishToDB(wish) {
+      if (isMock) {
+        const wishes = fetchWishesFromDB();
+        wishes.unshift(wish); // newest first
+        localStorage.setItem(WISHES_STORAGE_KEY, JSON.stringify(wishes));
+        // Trigger a storage event manually for the current tab, 
+        // real storage events only trigger on OTHER tabs
+        window.dispatchEvent(new Event('mock-snapshot'));
+      }
+      // Real Firebase addDoc would go here
+    }
+
+    function listenToWishes(callback) {
+      if (isMock) {
+        const handler = () => {
+          callback(fetchWishesFromDB());
+        };
+        // Listen to changes from this tab
+        window.addEventListener('mock-snapshot', handler);
+        // Listen to changes from other tabs
+        window.addEventListener('storage', (e) => {
+          if (e.key === WISHES_STORAGE_KEY) handler();
+        });
+        
+        // Initial fetch
+        handler();
+      }
+      // Real Firebase onSnapshot would go here
+    }
+
+    // ----- UI RENDER LOGIC -----
+    
+    function createWishHTML(wish, isNew = false) {
+      const escapedName = wish.name.replace(/[&<>'"]/g, t => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[t] || t));
+      const escapedMsg = wish.message.replace(/[&<>'"]/g, t => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[t] || t));
+      const d = new Date(wish.sentAt);
+      const dateStr = isNaN(d) ? "" : d.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
+      
+      const newClass = isNew ? " new-wish" : "";
+      
+      return `<div class="wish-item${newClass}">
+        <div class="wish-item-header">
+          <span class="wish-item-name">${escapedName}</span>
+          <span class="wish-item-date">${dateStr}</span>
+        </div>
+        <div class="wish-item-message">${escapedMsg}</div>
+      </div>`;
+    }
+
+    function renderWishes(wishesList, reset = false) {
+      if (!wishesDisplay) return;
+      
+      allWishes = wishesList;
+      
+      if (reset) {
+        displayedCount = Math.min(PAGE_SIZE, allWishes.length);
+        wishesDisplay.innerHTML = allWishes.slice(0, displayedCount)
+          .map(wish => createWishHTML(wish)).join("");
+      } else {
+        // If a new wish came in (live top-stacking)
+        // We find the difference and prepend it
+        const newWishesCount = allWishes.length - previousTotalWishes;
+        if (newWishesCount > 0) {
+          const newWishes = allWishes.slice(0, newWishesCount);
+          const newWishesHTML = newWishes.map(wish => createWishHTML(wish, true)).join("");
+          wishesDisplay.insertAdjacentHTML('afterbegin', newWishesHTML);
+          displayedCount += newWishesCount;
+        }
+      }
+      
+      previousTotalWishes = allWishes.length;
+      
+      // Update Load More button visibility
+      if (loadMoreContainer) {
+        if (displayedCount < allWishes.length) {
+          loadMoreContainer.style.display = "block";
+        } else {
+          loadMoreContainer.style.display = "none";
+        }
+      }
+    }
+
+    // Initialize Real-time listener
+    listenToWishes((wishes) => {
+      // If wishesDisplay is empty, do a reset render. 
+      // Otherwise it's a live update, prepend new ones.
+      const isInitialRender = displayedCount === 0 && wishes.length > 0;
+      renderWishes(wishes, isInitialRender);
+    });
+
+    if (loadMoreBtn) {
+      loadMoreBtn.addEventListener("click", () => {
+        const nextCount = Math.min(displayedCount + PAGE_SIZE, allWishes.length);
+        const nextBatch = allWishes.slice(displayedCount, nextCount);
+        const batchHTML = nextBatch.map(wish => createWishHTML(wish)).join("");
+        wishesDisplay.insertAdjacentHTML('beforeend', batchHTML);
+        displayedCount = nextCount;
+        
+        if (displayedCount >= allWishes.length && loadMoreContainer) {
+          loadMoreContainer.style.display = "none";
+        }
+      });
+    }
 
     if (!form || !successState) return;
 
@@ -493,7 +595,6 @@
     if (wandBtn) {
       wandBtn.addEventListener("click", () => {
         wandBtn.classList.remove("sparkle-animate");
-        // Force reflow to restart animation
         void wandBtn.offsetWidth;
         wandBtn.classList.add("sparkle-animate");
         wandBtn.addEventListener("animationend", () => {
@@ -508,6 +609,7 @@
 
       const name = form.wishName.value.trim();
       const message = form.wishMessage.value.trim();
+      const sendBtn = document.getElementById("wishesSendBtn");
 
       if (!name || name.length < 2) {
         showToast("Please enter your name.");
@@ -521,20 +623,31 @@
         return;
       }
 
-      // Save wish locally
-      const wishes = JSON.parse(localStorage.getItem("wedding-wishes") || "[]");
-      wishes.push({ name, message, sentAt: new Date().toISOString() });
-      localStorage.setItem("wedding-wishes", JSON.stringify(wishes));
+      // Show loading state
+      if (sendBtn) {
+        const originalText = sendBtn.innerText;
+        sendBtn.innerText = "Sending...";
+        sendBtn.disabled = true;
+      }
 
-      // Transition to success state
-      form.style.opacity = "0";
+      // Simulate network delay for effect
       setTimeout(() => {
-        form.style.display = "none";
-        successState.style.display = "flex";
-        renderWishes();
-      }, 500);
+        saveWishToDB({
+          name,
+          message,
+          sentAt: new Date().toISOString()
+        });
 
-      showToast(`Thank you, ${name}! Your wish has been sent. 💚`);
+        // Transition to success state
+        form.style.opacity = "0";
+        setTimeout(() => {
+          form.style.display = "none";
+          successState.style.display = "flex";
+          // We don't call renderWishes() manually here because the real-time listener (onSnapshot) handles it!
+        }, 500);
+
+        showToast(`Thank you, ${name}! Your wish has been sent. 💚`);
+      }, 600);
     });
   }
 
