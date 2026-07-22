@@ -288,7 +288,7 @@
 
     const createPetal = () => {
       // Limit simultaneous petals to avoid performance lag
-      if (document.visibilityState !== "visible" || field.children.length > 25) return;
+      if (document.visibilityState !== "visible" || field.children.length > 80) return;
 
       const petal = document.createElement("span");
       petal.className = "petal";
@@ -314,12 +314,12 @@
     };
 
     // Pre-populate some petals on startup
-    for (let i = 0; i < 8; i++) {
-      setTimeout(createPetal, i * 200);
+    for (let i = 0; i < 25; i++) {
+      setTimeout(createPetal, i * 100);
     }
     
     // Spawn loops
-    setInterval(createPetal, 900);
+    setInterval(createPetal, 200);
   }
 
   /* -------------------------------------------------------------
@@ -454,6 +454,38 @@
     const form = document.querySelector(selectors.wishesForm);
     const successState = document.querySelector(selectors.wishesSuccess);
     const wandBtn = document.querySelector(selectors.wishesWandBtn);
+    const wishesDisplay = document.getElementById("wishesDisplay");
+
+    function renderWishes() {
+      if (!wishesDisplay) return;
+      
+      const wishes = JSON.parse(localStorage.getItem("wedding-wishes") || "[]");
+      
+      if (wishes.length === 0) {
+        wishesDisplay.innerHTML = "";
+        return;
+      }
+      
+      // Get the last 5 wishes, newest first
+      const latestWishes = wishes.slice(-5).reverse();
+      
+      wishesDisplay.innerHTML = latestWishes.map(wish => {
+        const escapedName = wish.name.replace(/[&<>'"]/g, t => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[t] || t));
+        const escapedMsg = wish.message.replace(/[&<>'"]/g, t => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[t] || t));
+        const d = new Date(wish.sentAt);
+        const dateStr = isNaN(d) ? "" : d.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
+        
+        return `<div class="wish-item">
+          <div class="wish-item-header">
+            <span class="wish-item-name">${escapedName}</span>
+            <span class="wish-item-date">${dateStr}</span>
+          </div>
+          <div class="wish-item-message">${escapedMsg}</div>
+        </div>`;
+      }).join("");
+    }
+
+    renderWishes();
 
     if (!form || !successState) return;
 
@@ -499,6 +531,7 @@
       setTimeout(() => {
         form.style.display = "none";
         successState.style.display = "flex";
+        renderWishes();
       }, 500);
 
       showToast(`Thank you, ${name}! Your wish has been sent. 💚`);

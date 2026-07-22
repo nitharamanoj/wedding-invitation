@@ -22,7 +22,8 @@
 </head>
 
 <body>
-
+  <!-- Ambient Falling Stars & Sparkles Field (Full Page) -->
+  <div class="petal-field" id="petalField" aria-hidden="true"></div>
   <!-- Luxury Ribbon Reveal (Entry Gate) -->
   <div class="luxury-gate" id="luxuryGate">
 
@@ -60,8 +61,7 @@
       <div class="bg-star bg-star-8"></div>
     </div>
 
-    <!-- Ambient Falling Stars & Sparkles Field -->
-    <div class="petal-field" id="petalField" aria-hidden="true"></div>
+    <!-- Ambient Falling Stars & Sparkles Field moved to full page -->
 
     <!-- Sticky In-Card Header -->
     <header class="site-header" id="siteHeader">
@@ -81,7 +81,7 @@
       <i class="fa-solid fa-music"></i>
     </button>
     <audio id="bgMusic" preload="none" loop>
-      <source src="assets/music/wedding-theme.mp3" type="audio/mpeg">
+      <source src="assets/music/thoominnal.mp3" type="audio/mpeg">
     </audio>
 
     <!-- Content Sections -->
@@ -299,10 +299,9 @@
 
           <div class="detail-card venue-card reveal">
             <div class="map-frame">
-              <iframe title="St. Mary's Church, Muruckasserry"
-                src="https://www.google.com/maps/embed/v1/place?key=AIzaSyA4Q..._PLACEHOLDER_KEY&q=St.+Mary%27s+Church%2C+Muruckasserry"
-                loading="lazy" referrerpolicy="no-referrer-when-downgrade" id="googleMap">
-              </iframe>
+              <a href="https://www.google.com/maps/search/?api=1&query=St.+Mary%27s+Church%2C+Muruckasserry" target="_blank" rel="noopener" aria-label="Get directions to St. Mary's Church">
+                <img src="assets/images/st.marys church.jpg" alt="St. Mary's Church, Muruckasserry" loading="lazy">
+              </a>
             </div>
             <a class="button primary"
               href="https://www.google.com/maps/search/?api=1&query=St.+Mary%27s+Church%2C+Muruckasserry"
@@ -390,16 +389,16 @@
               <p>Your warm wishes have been received by the couple.</p>
             </div>
           </div>
+
+          <!-- Display Latest Wishes -->
+          <div class="wishes-display" id="wishesDisplay" aria-live="polite">
+            <!-- Wishes will be injected here -->
+          </div>
         </div>
       </section>
     </main>
 
-    <!-- Footer -->
-    <footer class="site-footer">
-      <span class="footer-monogram">A & J</span>
-      <p class="footer-names">Arun & Joycy</p>
-      <p class="footer-date">October 31, 2026</p>
-    </footer>
+    <!-- Footer (Removed per request) -->
   </div>
 
   <!-- Toast & Lightbox Modals -->
