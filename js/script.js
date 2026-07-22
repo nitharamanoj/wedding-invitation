@@ -456,24 +456,6 @@
     const wandBtn = document.querySelector(selectors.wishesWandBtn);
     const wishesDisplay = document.getElementById("wishesDisplay");
 
-    const wishesTitle = document.getElementById("wishesTitle");
-
-    // Easter egg to clear local wishes for testing
-    if (wishesTitle) {
-      wishesTitle.addEventListener("dblclick", () => {
-        localStorage.removeItem("wedding-wishes");
-        renderWishes();
-        showToast("Test wishes cleared!");
-        
-        if (form && successState) {
-          form.style.display = "flex";
-          form.style.opacity = "1";
-          successState.style.display = "none";
-          form.reset();
-        }
-      });
-    }
-
     function renderWishes() {
       if (!wishesDisplay) return;
       
