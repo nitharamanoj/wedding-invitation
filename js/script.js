@@ -32,7 +32,6 @@
 
   let countdownTimer;
   let toastTimer;
-  let synthPlayer;
   let autoScrollRAF;          // requestAnimationFrame ID
   let autoScrollActive = false;
   let autoScrollPaused = false; // paused by user interaction
@@ -330,59 +329,57 @@
   }
 
   /* -------------------------------------------------------------
-     Music Player & Fallback Web Audio Synthesizer
+     Music Player — uses new Audio() for maximum browser compatibility
      ------------------------------------------------------------- */
+  let bgAudio = null;
+
+  function getBgAudio() {
+    if (!bgAudio) {
+      bgAudio = new Audio("assets/music/song.mp4");
+      bgAudio.loop   = true;
+      bgAudio.volume = 1.0;
+      bgAudio.preload = "auto";
+      bgAudio.addEventListener("ended", () => setMusicButtonState(false));
+      bgAudio.addEventListener("error", (e) => {
+        console.error("Audio load error:", e);
+        showToast("Could not load music file.");
+      });
+    }
+    return bgAudio;
+  }
+
   function initMusic() {
     const button = document.querySelector(selectors.musicToggle);
-    const audio = document.querySelector(selectors.bgMusic);
-    
-    if (!button || !audio) return;
+    if (!button) return;
 
     button.addEventListener("click", () => {
-      const isSynthPlaying = synthPlayer && synthPlayer.isPlaying;
-      
-      if (audio.paused && !isSynthPlaying) {
+      const audio = getBgAudio();
+      if (audio.paused) {
         startAudioPlayback();
       } else {
         pauseAudioPlayback();
       }
     });
-
-    audio.addEventListener("ended", () => {
-      setMusicButtonState(false);
-    });
   }
 
   function startAudioPlayback() {
-    const button = document.querySelector(selectors.musicToggle);
-    const audio = document.querySelector(selectors.bgMusic);
-    if (!button || !audio) return;
-
-    audio.play().then(() => {
-      setMusicButtonState(true);
-    }).catch(() => {
-      // Fallback to synthesised player if audio file is missing
-      try {
-        if (!synthPlayer) {
-          synthPlayer = createSynthPlayer();
-        }
-        synthPlayer.play();
-        setMusicButtonState(true);
-        showToast("Playing ambient wedding melody loop.");
-      } catch (err) {
-        showToast("Audio playback not supported.");
-      }
-    });
+    const audio = getBgAudio();
+    const playPromise = audio.play();
+    if (playPromise !== undefined) {
+      playPromise
+        .then(() => {
+          setMusicButtonState(true);
+        })
+        .catch((err) => {
+          console.error("Audio play failed:", err);
+          showToast("Tap the music button to play.");
+        });
+    }
   }
 
   function pauseAudioPlayback() {
-    const button = document.querySelector(selectors.musicToggle);
-    const audio = document.querySelector(selectors.bgMusic);
-    if (!button || !audio) return;
-
-    audio.pause();
-    if (synthPlayer) {
-      synthPlayer.pause();
+    if (bgAudio) {
+      bgAudio.pause();
     }
     setMusicButtonState(false);
   }
@@ -390,69 +387,14 @@
   function setMusicButtonState(isPlaying) {
     const button = document.querySelector(selectors.musicToggle);
     if (!button) return;
-    
+
     button.classList.toggle("is-playing", isPlaying);
     button.setAttribute("aria-label", isPlaying ? "Pause music" : "Play music");
-    button.innerHTML = isPlaying 
+    button.innerHTML = isPlaying
       ? `<i class="fa-solid fa-volume-high"></i>`
       : `<i class="fa-solid fa-music"></i>`;
   }
 
-  // Synthesizes a very soft, ambient, chordal loop (E-major pentatonic)
-  function createSynthPlayer() {
-    const AudioContext = window.AudioContext || window.webkitAudioContext;
-    if (!AudioContext) return null;
-
-    const context = new AudioContext();
-    const masterGain = context.createGain();
-    masterGain.gain.value = 0.045; // ultra soft volume
-    masterGain.connect(context.destination);
-
-    // E-major pentatonic luxury romantic notes: E, F#, G#, B, C#
-    const notes = [164.81, 185.00, 207.65, 246.94, 277.18, 329.63, 369.99, 415.30];
-    let index = 0;
-    let timerId = null;
-
-    const playStep = () => {
-      const now = context.currentTime;
-      const osc = context.createOscillator();
-      const gain = context.createGain();
-      
-      osc.type = "sine";
-      // Arpeggiate
-      osc.frequency.setValueAtTime(notes[index % notes.length], now);
-      
-      gain.gain.setValueAtTime(0.0001, now);
-      gain.gain.exponentialRampToValueAtTime(0.18, now + 0.1);
-      gain.gain.exponentialRampToValueAtTime(0.0001, now + 2.2);
-      
-      osc.connect(gain);
-      gain.connect(masterGain);
-      
-      osc.start(now);
-      osc.stop(now + 2.5);
-      
-      index++;
-      // Alternate tempo slightly for organic feel
-      const nextDelay = index % 3 === 0 ? 1200 : 750;
-      timerId = setTimeout(playStep, nextDelay);
-    };
-
-    return {
-      isPlaying: false,
-      play() {
-        if (context.state === "suspended") {
-          context.resume();
-        }
-        playStep();
-        this.isPlaying = true;
-      },
-      pause() {
-        if (timerId) clearTimeout(timerId);
-        this.isPlaying = false;
-      }
-    };
-  }
 
   /* -------------------------------------------------------------
      Guest Wishes Backend & UI Logic
