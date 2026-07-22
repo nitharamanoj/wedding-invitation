@@ -1,5 +1,6 @@
 (() => {
   "use strict";
+  localStorage.removeItem("wedding-wishes");
 
   const wedding = {
     title: "Arun & Joycy's Wedding",
