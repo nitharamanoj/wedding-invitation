@@ -33,6 +33,9 @@
   let countdownTimer;
   let toastTimer;
   let synthPlayer;
+  let autoScrollRAF;          // requestAnimationFrame ID
+  let autoScrollActive = false;
+  let autoScrollPaused = false; // paused by user interaction
 
   // Prevent scroll restoration by browser
   if ("scrollRestoration" in window.history) {
@@ -57,6 +60,7 @@
     initWishes();
     initGallery();
     initLightbox();
+    injectAutoScrollBtn();
   });
 
   /* -------------------------------------------------------------
@@ -105,6 +109,9 @@
           if (window.animateHero) {
             window.animateHero();
           }
+
+          // Begin auto-scroll after a short pause so the hero animation settles
+          setTimeout(() => startAutoScroll(), 3500);
         });
       }
     }, { once: true }); // Ensure it only fires once
@@ -710,6 +717,118 @@
     document.addEventListener("keydown", (e) => {
       if (e.key === "Escape" && lightbox.classList.contains("is-open")) close();
     });
+  }
+
+  /* -------------------------------------------------------------
+     Auto-Scroll
+     ------------------------------------------------------------- */
+  function injectAutoScrollBtn() {
+    const btn = document.createElement("button");
+    btn.id = "autoScrollBtn";
+    btn.className = "auto-scroll-btn";
+    btn.setAttribute("type", "button");
+    btn.setAttribute("aria-label", "Pause auto scroll");
+    btn.setAttribute("aria-pressed", "false");
+    btn.innerHTML = `<i class="fa-solid fa-angles-down"></i>`;
+    btn.style.display = "none"; // hidden until scroll starts
+    document.getElementById("cardFrame")?.appendChild(btn);
+
+    btn.addEventListener("click", () => {
+      if (autoScrollPaused) {
+        resumeAutoScroll();
+      } else {
+        pauseAutoScroll(true); // manual pause
+      }
+    });
+  }
+
+  function startAutoScroll() {
+    const cardFrame = document.querySelector(selectors.cardFrame);
+    if (!cardFrame) return;
+
+    // Make button visible
+    const btn = document.getElementById("autoScrollBtn");
+    if (btn) btn.style.display = "flex";
+
+    autoScrollActive = true;
+    autoScrollPaused = false;
+    updateAutoScrollBtn();
+
+    // Pause on any user gesture inside the card
+    const pauseEvents = ["wheel", "touchstart", "mousedown", "keydown"];
+    pauseEvents.forEach(ev =>
+      cardFrame.addEventListener(ev, onUserInteraction, { passive: true })
+    );
+
+    tickAutoScroll(cardFrame);
+  }
+
+  function tickAutoScroll(cardFrame) {
+    if (!autoScrollActive || autoScrollPaused) return;
+
+    const speed = 0.6; // px per frame — tweak for faster/slower
+    const maxScroll = cardFrame.scrollHeight - cardFrame.clientHeight;
+
+    if (cardFrame.scrollTop >= maxScroll - 1) {
+      // Reached the bottom — stop
+      stopAutoScroll();
+      return;
+    }
+
+    cardFrame.scrollTop += speed;
+    autoScrollRAF = requestAnimationFrame(() => tickAutoScroll(cardFrame));
+  }
+
+  function pauseAutoScroll(manual = false) {
+    autoScrollPaused = true;
+    cancelAnimationFrame(autoScrollRAF);
+    updateAutoScrollBtn();
+
+    if (manual) return; // keep paused until user resumes
+
+    // If paused by touch/wheel, auto-resume after 4 s of inactivity
+    clearTimeout(window._autoScrollResumeTimer);
+    window._autoScrollResumeTimer = setTimeout(() => {
+      if (autoScrollActive && autoScrollPaused) resumeAutoScroll();
+    }, 4000);
+  }
+
+  function resumeAutoScroll() {
+    const cardFrame = document.querySelector(selectors.cardFrame);
+    if (!cardFrame || !autoScrollActive) return;
+    autoScrollPaused = false;
+    updateAutoScrollBtn();
+    tickAutoScroll(cardFrame);
+  }
+
+  function stopAutoScroll() {
+    autoScrollActive = false;
+    autoScrollPaused = false;
+    cancelAnimationFrame(autoScrollRAF);
+    const btn = document.getElementById("autoScrollBtn");
+    if (btn) btn.style.display = "none";
+  }
+
+  function onUserInteraction() {
+    if (autoScrollActive && !autoScrollPaused) {
+      pauseAutoScroll(false); // will auto-resume after 4 s
+    }
+  }
+
+  function updateAutoScrollBtn() {
+    const btn = document.getElementById("autoScrollBtn");
+    if (!btn) return;
+    if (autoScrollPaused) {
+      btn.innerHTML = `<i class="fa-solid fa-play"></i>`;
+      btn.setAttribute("aria-label", "Resume auto scroll");
+      btn.setAttribute("aria-pressed", "true");
+      btn.classList.add("is-paused");
+    } else {
+      btn.innerHTML = `<i class="fa-solid fa-angles-down"></i>`;
+      btn.setAttribute("aria-label", "Pause auto scroll");
+      btn.setAttribute("aria-pressed", "false");
+      btn.classList.remove("is-paused");
+    }
   }
 
   /* -------------------------------------------------------------

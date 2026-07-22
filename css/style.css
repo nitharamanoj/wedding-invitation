@@ -2446,3 +2446,60 @@ section {
 .wish-item.new-wish {
   animation: slideDownFade 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
+
+/* ---------------------------------------------------------------
+   Auto-Scroll Button
+   --------------------------------------------------------------- */
+.auto-scroll-btn {
+  position: sticky;
+  bottom: 5.2rem;           /* sits just above the music toggle */
+  left: auto;
+  right: 1rem;
+  z-index: 120;
+
+  /* Layout */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.6rem;
+  height: 2.6rem;
+  border-radius: 50%;
+  border: 1.5px solid rgba(196, 164, 124, 0.5);
+  cursor: pointer;
+
+  /* Gold gradient surface */
+  background: linear-gradient(135deg, #C4A47C 0%, #A8865C 100%);
+  color: #FDFBF7;
+  font-size: 0.85rem;
+
+  /* Shadow + transition */
+  box-shadow: 0 4px 16px rgba(168, 134, 92, 0.45);
+  transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.3s ease;
+
+  /* The button is appended into #cardFrame which is position:relative,
+     so `sticky` references the card frame's scroll context.
+     We float it to the right margin by using margin-left: auto */
+  margin-left: auto;
+}
+
+.auto-scroll-btn:hover {
+  transform: scale(1.12);
+  box-shadow: 0 6px 22px rgba(168, 134, 92, 0.6);
+}
+
+/* Bouncing chevron animation while actively scrolling */
+.auto-scroll-btn:not(.is-paused) i {
+  animation: autoScrollBounce 1.2s ease-in-out infinite;
+}
+
+@keyframes autoScrollBounce {
+  0%, 100% { transform: translateY(0); }
+  50%       { transform: translateY(4px); }
+}
+
+/* Paused state — muted gold surface */
+.auto-scroll-btn.is-paused {
+  background: linear-gradient(135deg, #9A8B76 0%, #7A6E5E 100%);
+  box-shadow: 0 4px 12px rgba(90, 80, 70, 0.35);
+}
+
