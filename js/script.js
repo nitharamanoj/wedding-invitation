@@ -331,8 +331,8 @@
     const colors = ["#C4A47C", "#DAB88C", "#E8DCC4", "#FDFBF7", "#FFFFFF"]; // Theme-matching gold and white hues
 
     const createPetal = () => {
-      // Limit simultaneous petals to avoid performance lag
-      if (document.visibilityState !== "visible" || field.children.length > 80) return;
+      // Limit simultaneous petals to avoid performance lag and keep it elegant (max 20)
+      if (document.visibilityState !== "visible" || field.children.length > 20) return;
 
       const petal = document.createElement("span");
       petal.className = "petal";
@@ -358,12 +358,12 @@
     };
 
     // Pre-populate some petals on startup
-    for (let i = 0; i < 25; i++) {
-      setTimeout(createPetal, i * 100);
+    for (let i = 0; i < 8; i++) {
+      setTimeout(createPetal, i * 200);
     }
     
-    // Spawn loops
-    setInterval(createPetal, 200);
+    // Spawn loops (slower spawn rate for elegance)
+    setInterval(createPetal, 600);
   }
 
   /* -------------------------------------------------------------
