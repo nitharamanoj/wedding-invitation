@@ -328,7 +328,7 @@
     if (!field || prefersReducedMotion) return;
 
     const symbols = ["❀", "✿", "✦", "✧", "✨", "✺"]; // Shining stars and flowers
-    const colors = ["#FFB6C1", "#FFC0CB", "#F8C8DC", "#F9D6D5", "#C4A47C"]; // Baby pinks and subtle gold
+    const colors = ["#FFB6C1", "#FFC0CB", "#F8C8DC", "#FFFFFF", "#FDFBF7", "#C4A47C"]; // Mix of baby pink and white/gold
 
     const createPetal = () => {
       // Limit simultaneous petals to avoid performance lag and keep it elegant (max 20)
