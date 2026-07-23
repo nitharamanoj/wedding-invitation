@@ -75,20 +75,37 @@
 
     if (!video || !overlay || !playBtn) return;
 
+    // Toggle overlay based on actual video state
+    video.addEventListener("playing", () => {
+      overlay.classList.add("is-hidden");
+    });
+
+    video.addEventListener("pause", () => {
+      overlay.classList.remove("is-hidden");
+    });
+
     // Try silent autoplay (works on desktop / some Android)
-    video.play()
-      .then(() => { overlay.classList.add("is-hidden"); })
-      .catch(() => { /* blocked on iOS — overlay stays visible for tap */ });
+    const playPromise = video.play();
+    if (playPromise !== undefined) {
+      playPromise.catch(() => {
+        // Autoplay blocked — overlay will naturally remain visible
+        console.log("Autoplay blocked, waiting for user tap.");
+      });
+    }
 
     // Tap overlay or play button to start
     const handlePlay = () => {
-      video.play()
-        .then(() => { overlay.classList.add("is-hidden"); })
-        .catch((err) => { console.warn("Video play failed:", err); });
+      if (video.paused) {
+        video.play().catch(err => console.warn("Video play failed:", err));
+      } else {
+        video.pause();
+      }
     };
 
     overlay.addEventListener("click", handlePlay);
     playBtn.addEventListener("click", (e) => { e.stopPropagation(); handlePlay(); });
+    // Also allow tapping the video itself to pause it
+    video.addEventListener("click", handlePlay);
   }
 
   /* -------------------------------------------------------------
