@@ -1451,7 +1451,7 @@ section {
   line-height: 1;
   pointer-events: none;
   animation: fallPetal linear forwards;
-  filter: drop-shadow(0 0 6px rgba(196, 164, 124, 0.7)) drop-shadow(0 0 2px rgba(255, 255, 255, 0.9));
+  filter: drop-shadow(0 0 6px rgba(255, 182, 193, 0.7)) drop-shadow(0 0 2px rgba(255, 255, 255, 0.9));
 }
 
 @keyframes fallPetal {
