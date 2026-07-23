@@ -2509,6 +2509,8 @@ section {
 .video-wrapper {
   position: relative;
   width: 100%;
+  min-height: 250px;
+  background-color: #1a1a1a; /* fallback color */
   overflow: hidden;
   border-radius: 12px;
 }
