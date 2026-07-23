@@ -1450,23 +1450,23 @@ section {
   line-height: 1;
   pointer-events: none;
   animation: fallPetal linear forwards;
-  filter: drop-shadow(0 0 3px rgba(244, 208, 104, 0.4));
+  filter: drop-shadow(0 0 6px rgba(196, 164, 124, 0.7)) drop-shadow(0 0 2px rgba(255, 255, 255, 0.9));
 }
 
 @keyframes fallPetal {
   0% {
-    transform: translateY(-20px) translateX(0) rotate(0deg);
+    transform: translateY(-20px) translateX(0) rotate(0deg) scale(0.8);
     opacity: 0;
   }
-  15% {
-    opacity: 0.75;
-  }
-  90% {
-    opacity: 0.75;
-  }
+  10% { opacity: 0.9; transform: translateY(10vh) translateX(calc(var(--petal-drift) * 0.1)) rotate(45deg) scale(1.1); }
+  25% { opacity: 0.4; transform: translateY(25vh) translateX(calc(var(--petal-drift) * 0.25)) rotate(90deg) scale(0.9); }
+  40% { opacity: 1; transform: translateY(40vh) translateX(calc(var(--petal-drift) * 0.4)) rotate(135deg) scale(1.2); }
+  55% { opacity: 0.3; transform: translateY(55vh) translateX(calc(var(--petal-drift) * 0.55)) rotate(180deg) scale(0.8); }
+  70% { opacity: 0.9; transform: translateY(70vh) translateX(calc(var(--petal-drift) * 0.7)) rotate(225deg) scale(1.1); }
+  85% { opacity: 0.4; transform: translateY(85vh) translateX(calc(var(--petal-drift) * 0.85)) rotate(270deg) scale(0.9); }
   100% {
     /* Drift diagonally from left-to-right to match the stream direction */
-    transform: translateY(105vh) translateX(var(--petal-drift)) rotate(360deg);
+    transform: translateY(105vh) translateX(var(--petal-drift)) rotate(360deg) scale(1);
     opacity: 0;
   }
 }

@@ -327,8 +327,8 @@
     
     if (!field || prefersReducedMotion) return;
 
-    const symbols = ["❀", "✿", "✦", "✧"]; // Removed the leaf symbol 🌿
-    const colors = ["#A9B7A0", "#7A8B68", "#C89B3C", "#D8B365", "#FAF8F4"];
+    const symbols = ["❀", "✿", "✦", "✧", "✨", "✺"]; // Shining stars and flowers
+    const colors = ["#C4A47C", "#DAB88C", "#E8DCC4", "#FDFBF7", "#FFFFFF"]; // Theme-matching gold and white hues
 
     const createPetal = () => {
       // Limit simultaneous petals to avoid performance lag
