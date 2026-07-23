@@ -64,48 +64,40 @@
   });
 
   /* -------------------------------------------------------------
-     Journey Together Video — Tap-to-Play (Mobile Fix)
-     Mobile browsers (iOS/Android) block autoplay — this shows a
-     gold overlay the user taps to start the video.
+     Journey Together Video — Autoplay on Scroll
      ------------------------------------------------------------- */
   function initVideoPlayer() {
-    const video   = document.getElementById("journeyVideo");
-    const overlay = document.getElementById("videoPlayOverlay");
-    const playBtn = document.getElementById("videoPlayBtn");
+    const video = document.getElementById("journeyVideo");
+    if (!video) return;
 
-    if (!video || !overlay || !playBtn) return;
-
-    // Toggle overlay based on actual video state
-    video.addEventListener("playing", () => {
-      overlay.classList.add("is-hidden");
-    });
-
-    video.addEventListener("pause", () => {
-      overlay.classList.remove("is-hidden");
-    });
-
-    // Try silent autoplay (works on desktop / some Android)
-    const playPromise = video.play();
-    if (playPromise !== undefined) {
-      playPromise.catch(() => {
-        // Autoplay blocked — overlay will naturally remain visible
-        console.log("Autoplay blocked, waiting for user tap.");
-      });
+    // Use IntersectionObserver to play video only when it's in viewport.
+    // This bypasses strict iOS Safari autoplay restrictions which block
+    // videos from playing if they are off-screen when the page loads.
+    if ('IntersectionObserver' in window) {
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            video.play().catch(err => console.warn("Autoplay prevented by browser:", err));
+          } else {
+            video.pause();
+          }
+        });
+      }, { threshold: 0.2 });
+      
+      observer.observe(video);
+    } else {
+      // Fallback for older browsers
+      video.play().catch(err => console.warn("Autoplay prevented by browser:", err));
     }
-
-    // Tap overlay or play button to start
-    const handlePlay = () => {
+    
+    // Tap to pause/play (optional convenience for user)
+    video.addEventListener("click", () => {
       if (video.paused) {
-        video.play().catch(err => console.warn("Video play failed:", err));
+        video.play().catch(err => console.warn("Play prevented:", err));
       } else {
         video.pause();
       }
-    };
-
-    overlay.addEventListener("click", handlePlay);
-    playBtn.addEventListener("click", (e) => { e.stopPropagation(); handlePlay(); });
-    // Also allow tapping the video itself to pause it
-    video.addEventListener("click", handlePlay);
+    });
   }
 
   /* -------------------------------------------------------------

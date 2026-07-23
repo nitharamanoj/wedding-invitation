@@ -2504,92 +2504,14 @@ section {
 }
 
 /* -------------------------------------------------------------
-   Journey Together Video — Tap-to-Play Overlay
+   Journey Together Video
    ------------------------------------------------------------- */
-.video-wrapper {
-  position: relative;
-  width: 100%;
-  min-height: 250px;
-  background-color: #1a1a1a; /* fallback color */
-  overflow: hidden;
-  border-radius: 12px;
-}
-
 .hero-video {
   width: 100%;
   height: auto;
   display: block;
   border-radius: 12px;
-}
-
-.video-play-overlay {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 0.75rem;
-  background: rgba(20, 12, 5, 0.42);
-  backdrop-filter: blur(4px);
-  border-radius: 12px;
-  cursor: pointer;
-  z-index: 2;
-  transition: opacity 0.45s ease, visibility 0.45s ease;
-  opacity: 1;
-  visibility: visible;
-}
-
-.video-play-overlay.is-hidden {
-  opacity: 0;
-  visibility: hidden;
-  pointer-events: none;
-}
-
-.video-play-btn {
-  position: relative;
-  width: 5rem;
-  height: 5rem;
-  border-radius: 50%;
-  border: 2px solid rgba(196, 164, 124, 0.8);
-  background: linear-gradient(135deg, rgba(196,164,124,0.95) 0%, rgba(168,134,92,0.95) 100%);
-  color: #FDFBF7;
-  font-size: 1.5rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding-left: 4px;
-  cursor: pointer;
-  box-shadow: 0 6px 30px rgba(196, 164, 124, 0.5);
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-}
-
-.video-play-btn:hover,
-.video-play-btn:focus-visible {
-  transform: scale(1.1);
-  box-shadow: 0 10px 40px rgba(196, 164, 124, 0.7);
-  outline: none;
-}
-
-.video-play-btn::before {
-  content: '';
-  position: absolute;
-  inset: -4px;
-  border-radius: 50%;
-  border: 2px solid rgba(196, 164, 124, 0.45);
-  animation: videoPulse 2s ease-out infinite;
-}
-
-@keyframes videoPulse {
-  0%   { transform: scale(1);   opacity: 0.8; }
-  100% { transform: scale(1.8); opacity: 0;   }
-}
-
-.video-play-hint {
-  font-family: var(--font-body);
-  font-size: 0.75rem;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: rgba(253, 251, 247, 0.88);
-  margin: 0;
+  background-color: #1a1a1a;
+  min-height: 250px;
+  object-fit: cover;
 }
