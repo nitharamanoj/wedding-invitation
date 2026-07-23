@@ -18,7 +18,7 @@
   <!-- Icon Libraries & Swiper -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css">
-  <link rel="stylesheet" href="css/style.css?v=18">
+  <link rel="stylesheet" href="css/style.css?v=19">
 </head>
 
 <body>
@@ -180,7 +180,15 @@
             <h2 id="scrollSceneTitle">A Journey Together</h2>
             <div class="hairline-divider"><span class="diamond-glyph">♦</span></div>
           </div>
-          <video class="hero-video" src="assets/videos/video.mp4" autoplay loop muted playsinline></video>
+          <div class="video-wrapper" id="videoWrapper">
+            <video class="hero-video" id="journeyVideo" src="assets/videos/journey.mp4" loop muted playsinline webkit-playsinline></video>
+            <div class="video-play-overlay" id="videoPlayOverlay">
+              <button class="video-play-btn" id="videoPlayBtn" type="button" aria-label="Play video">
+                <i class="fa-solid fa-play"></i>
+              </button>
+              <p class="video-play-hint">Tap to play</p>
+            </div>
+          </div>
         </div>
       </section>
 
@@ -416,7 +424,7 @@
   <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
-  <script src="js/script.js?v=17"></script>
+  <script src="js/script.js?v=18"></script>
   <script src="js/animations.js?v=17"></script>
 </body>
 

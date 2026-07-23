@@ -60,7 +60,36 @@
     initGallery();
     initLightbox();
     injectAutoScrollBtn();
+    initVideoPlayer();
   });
+
+  /* -------------------------------------------------------------
+     Journey Together Video — Tap-to-Play (Mobile Fix)
+     Mobile browsers (iOS/Android) block autoplay — this shows a
+     gold overlay the user taps to start the video.
+     ------------------------------------------------------------- */
+  function initVideoPlayer() {
+    const video   = document.getElementById("journeyVideo");
+    const overlay = document.getElementById("videoPlayOverlay");
+    const playBtn = document.getElementById("videoPlayBtn");
+
+    if (!video || !overlay || !playBtn) return;
+
+    // Try silent autoplay (works on desktop / some Android)
+    video.play()
+      .then(() => { overlay.classList.add("is-hidden"); })
+      .catch(() => { /* blocked on iOS — overlay stays visible for tap */ });
+
+    // Tap overlay or play button to start
+    const handlePlay = () => {
+      video.play()
+        .then(() => { overlay.classList.add("is-hidden"); })
+        .catch((err) => { console.warn("Video play failed:", err); });
+    };
+
+    overlay.addEventListener("click", handlePlay);
+    playBtn.addEventListener("click", (e) => { e.stopPropagation(); handlePlay(); });
+  }
 
   /* -------------------------------------------------------------
      Luxury Ribbon Reveal Sequence
