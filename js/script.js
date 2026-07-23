@@ -322,48 +322,7 @@
      Ambient Falling Petals
      ------------------------------------------------------------- */
   function initPetals() {
-    const field = document.querySelector(selectors.petalField);
-    const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    
-    if (!field || prefersReducedMotion) return;
-
-    const symbols = ["❀", "✿", "✦", "✧", "🌿"];
-    const colors = ["#A9B7A0", "#7A8B68", "#C89B3C", "#D8B365", "#FAF8F4"];
-
-    const createPetal = () => {
-      // Limit simultaneous petals to avoid performance lag
-      if (document.visibilityState !== "visible" || field.children.length > 80) return;
-
-      const petal = document.createElement("span");
-      petal.className = "petal";
-      petal.textContent = symbols[Math.floor(Math.random() * symbols.length)];
-      
-      const size = 0.4 + Math.random() * 0.8; // Rem size
-      const duration = 6 + Math.random() * 7; // Seconds
-      
-      // Drift leftwards (negative value) to match the diagonal flow of the starry sky image
-      const drift = -80 - Math.random() * 120; // Pixels
-      
-      // Start slightly more to the right to offset the leftward drift
-      petal.style.left = `${15 + Math.random() * 95}%`;
-      petal.style.fontSize = `${size}rem`;
-      petal.style.color = colors[Math.floor(Math.random() * colors.length)];
-      petal.style.setProperty("--petal-drift", `${drift}px`);
-      petal.style.animationDuration = `${duration}s`;
-      
-      field.appendChild(petal);
-      
-      // Cleanup DOM
-      setTimeout(() => petal.remove(), duration * 1000);
-    };
-
-    // Pre-populate some petals on startup
-    for (let i = 0; i < 25; i++) {
-      setTimeout(createPetal, i * 100);
-    }
-    
-    // Spawn loops
-    setInterval(createPetal, 200);
+    return; // Disabled by user request
   }
 
   /* -------------------------------------------------------------
