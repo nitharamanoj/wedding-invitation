@@ -702,7 +702,7 @@
         sendBtn.disabled = true;
       }
 
-      // Send wish to FormSubmit (Emails go to arungeorgett@gmail.com, CC to nithara.bca23@stcp.ac.in)
+      // Send wish to FormSubmit (Emails go to arungeorgett@gmail.com)
       const FORMSUBMIT_ENDPOINT = "https://formsubmit.co/ajax/arungeorgett@gmail.com"; 
 
       fetch(FORMSUBMIT_ENDPOINT, {
@@ -714,8 +714,7 @@
         body: JSON.stringify({
           name: name,
           message: message,
-          _subject: `New Wedding Wish from ${name}!`,
-          _cc: "nithara.bca23@stcp.ac.in"
+          _subject: `New Wedding Wish from ${name}!`
         })
       }).then(response => {
         if (response.ok) {
