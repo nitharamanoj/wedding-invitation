@@ -37,17 +37,13 @@
     const timeline = gsap.timeline({ defaults: { ease: "power3.out" } });
 
     // Initial state resets
-    gsap.set(".hero-content .eyebrow, .hero-content h1, .hero-content .hairline-divider, .hero-content .hero-date, .hero-content .hero-tagline", {
+    gsap.set(".hero-content h1", {
       opacity: 0,
       y: 20
     });
 
     timeline
-      .to(".hero-content .eyebrow", { y: 0, opacity: 1, duration: 0.8, delay: 0.3 })
-      .to(".hero-content h1", { y: 0, opacity: 1, duration: 1.1 }, "-=0.5")
-      .to(".hero-content .hairline-divider", { y: 0, opacity: 1, duration: 0.6 }, "-=0.6")
-      .to(".hero-content .hero-date", { y: 0, opacity: 1, duration: 0.8 }, "-=0.4")
-      .to(".hero-content .hero-tagline", { y: 0, opacity: 1, duration: 0.8 }, "-=0.5");
+      .to(".hero-content h1", { y: 0, opacity: 1, duration: 1.1, delay: 0.3 });
   };
 
   // Luxury Ribbon untying sequence (standalone)
@@ -76,12 +72,6 @@
       .to(".envelope-item", { scale: 4, opacity: 0, duration: 0.8, ease: "power2.in" }, "-=0.2")
       
       // Phase 2: Fade Out Gate completely to Reveal Website
-      .to(".monogram-wrapper-standalone", {
-        y: -30,
-        opacity: 0,
-        duration: 0.8,
-        ease: "power2.in"
-      }, "-=0.4")
       .to("#luxuryGate", {
         opacity: 0,
         duration: 1.0,
@@ -145,7 +135,7 @@
       el.style.opacity = "1";
       el.style.transform = "none";
     });
-    const heroElements = document.querySelectorAll(".hero-content .eyebrow, .hero-content h1, .hero-content .hairline-divider, .hero-content .hero-date, .hero-content .hero-tagline");
+    const heroElements = document.querySelectorAll(".hero-content h1");
     heroElements.forEach((el) => {
       el.style.opacity = "1";
       el.style.transform = "none";
