@@ -36,6 +36,12 @@
   let autoScrollActive = false;
   let autoScrollPaused = false; // paused by user interaction
 
+  // Media preloader state
+  let isVideoReady = false;
+  let isAudioReady = false;
+  let mediaFallbackTriggered = false;
+  let isWaitingForMediaToOpen = false;
+
   // Prevent scroll restoration by browser
   if ("scrollRestoration" in window.history) {
     window.history.scrollRestoration = "manual";
@@ -49,6 +55,7 @@
       frame.classList.add("is-locked");
     }
 
+    initMediaPreloader();
     initLuxuryGate();
     initCountdown();
     initCeremonyCountdown();
@@ -129,29 +136,107 @@
     ribbonBow.addEventListener("click", () => {
       clearInterval(particlesInterval);
       
-      showToast("Opening the envelope...");
-
-      // Trigger the GSAP animation from animations.js
-      if (window.animateRibbonOpening) {
-        window.animateRibbonOpening(() => {
-          luxuryGate.classList.add("is-parted");
-          cardFrame.classList.remove("is-locked");
-          
-          // Try to start background music after user gesture
-          startAudioPlayback();
-          
-          showToast("Welcome to our Wedding Invitation.");
-          
-          // Trigger GSAP entry animations if available
-          if (window.animateHero) {
-            window.animateHero();
-          }
-
-          // Begin auto-scroll after a short pause so the hero animation settles
-          setTimeout(() => startAutoScroll(), 3500);
-        });
+      // Unlock audio proactively on click
+      const audio = getBgAudio();
+      audio.play().then(() => audio.pause()).catch(() => {});
+      
+      if (isVideoReady && isAudioReady) {
+        proceedWithOpening();
+      } else {
+        isWaitingForMediaToOpen = true;
+        const instruction = document.getElementById("instructionText");
+        if (instruction) instruction.textContent = "Preparing your invitation…";
       }
     }, { once: true }); // Ensure it only fires once
+  }
+
+  function proceedWithOpening() {
+    const luxuryGate = document.querySelector(selectors.luxuryGate);
+    const cardFrame = document.querySelector(selectors.cardFrame);
+    
+    showToast("Opening the envelope...");
+
+    // Trigger the GSAP animation from animations.js
+    if (window.animateRibbonOpening) {
+      window.animateRibbonOpening(() => {
+        luxuryGate.classList.add("is-parted");
+        cardFrame.classList.remove("is-locked");
+        
+        // Try to start background music after user gesture
+        startAudioPlayback();
+        
+        showToast("Welcome to our Wedding Invitation.");
+        
+        // Trigger GSAP entry animations if available
+        if (window.animateHero) {
+          window.animateHero();
+        }
+
+        // Begin auto-scroll after a short pause so the hero animation settles
+        setTimeout(() => startAutoScroll(), 3500);
+      });
+    }
+  }
+
+  function initMediaPreloader() {
+    // Preload Video
+    const hiddenVideo = document.createElement("video");
+    hiddenVideo.src = "assets/videos/journey.mp4";
+    hiddenVideo.preload = "auto";
+    hiddenVideo.muted = true;
+    hiddenVideo.playsInline = true;
+    
+    const onVideoReady = () => {
+      isVideoReady = true;
+      checkProceedToOpen();
+    };
+    hiddenVideo.addEventListener("canplaythrough", onVideoReady);
+    hiddenVideo.addEventListener("error", onVideoReady);
+    if (hiddenVideo.readyState >= 3) {
+      isVideoReady = true;
+    }
+
+    // Preload Audio
+    const hiddenAudio = document.createElement("audio");
+    hiddenAudio.src = "assets/music/song.mp4";
+    hiddenAudio.preload = "auto";
+    
+    const onAudioReady = () => {
+      isAudioReady = true;
+      checkProceedToOpen();
+    };
+    hiddenAudio.addEventListener("canplaythrough", onAudioReady);
+    hiddenAudio.addEventListener("error", onAudioReady);
+    if (hiddenAudio.readyState >= 3) {
+      isAudioReady = true;
+    }
+
+    // Fallback timer (10s)
+    setTimeout(() => {
+      if (!mediaFallbackTriggered && (!isVideoReady || !isAudioReady)) {
+        mediaFallbackTriggered = true;
+        isVideoReady = true;
+        isAudioReady = true;
+        checkProceedToOpen();
+      }
+    }, 10000);
+  }
+
+  function checkProceedToOpen() {
+    if (isVideoReady && isAudioReady) {
+      const loader = document.getElementById("mediaLoader");
+      if (loader) loader.style.opacity = "0";
+      
+      const instruction = document.getElementById("instructionText");
+      if (instruction && instruction.textContent === "Preparing your invitation…") {
+        instruction.textContent = "Click to open";
+      }
+
+      if (isWaitingForMediaToOpen) {
+        isWaitingForMediaToOpen = false;
+        proceedWithOpening();
+      }
+    }
   }
 
   function spawnSparkle(container, relativeTo) {
@@ -617,24 +702,51 @@
         sendBtn.disabled = true;
       }
 
-      // Simulate network delay for effect
-      setTimeout(() => {
-        saveWishToDB({
-          name,
-          message,
-          sentAt: new Date().toISOString()
-        });
+      // Send wish to FormSubmit (Emails go to arungeorgett@gmail.com)
+      const FORMSUBMIT_ENDPOINT = "https://formsubmit.co/ajax/arungeorgett@gmail.com"; 
 
-        // Transition to success state
-        form.style.opacity = "0";
-        setTimeout(() => {
-          form.style.display = "none";
-          successState.style.display = "flex";
-          // We don't call renderWishes() manually here because the real-time listener (onSnapshot) handles it!
-        }, 500);
+      fetch(FORMSUBMIT_ENDPOINT, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        body: JSON.stringify({
+          name: name,
+          message: message,
+          _subject: `New Wedding Wish from ${name}!`
+        })
+      }).then(response => {
+        if (response.ok) {
+          // Save locally so the user sees it on their screen
+          saveWishToDB({
+            name,
+            message,
+            sentAt: new Date().toISOString()
+          });
 
-        showToast(`Thank you, ${name}! Your wish has been sent. 💚`);
-      }, 600);
+          // Transition to success state
+          form.style.opacity = "0";
+          setTimeout(() => {
+            form.style.display = "none";
+            successState.style.display = "flex";
+          }, 500);
+
+          showToast(`Thank you, ${name}! Your wish has been sent. 💚`);
+        } else {
+          showToast("Oops! There was a problem sending your wish.");
+          if (sendBtn) {
+            sendBtn.innerText = "Send Wish";
+            sendBtn.disabled = false;
+          }
+        }
+      }).catch(error => {
+        showToast("Oops! There was a problem sending your wish.");
+        if (sendBtn) {
+          sendBtn.innerText = "Send Wish";
+          sendBtn.disabled = false;
+        }
+      });
     });
   }
 
