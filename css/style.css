@@ -2407,7 +2407,7 @@ section {
 .wish-item {
   background: rgba(255, 255, 255, 0.05) !important;
   border: 1px solid rgba(212, 175, 55, 0.15) !important;
-  color: var(--color-warm-white) !important;
+  color: var(--color-ink) !important;
 }
 
 .wish-item-name {
@@ -2415,11 +2415,11 @@ section {
 }
 
 .wish-item-message {
-  color: var(--color-warm-white) !important;
+  color: var(--color-ink) !important;
 }
 
 .wish-item-date {
-  color: rgba(255, 255, 255, 0.5) !important;
+  color: var(--color-olive) !important;
 }
 
 /* Load more button */
