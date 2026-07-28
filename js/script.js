@@ -1,3 +1,6 @@
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
 (() => {
   "use strict";
 
@@ -536,55 +539,45 @@
     let previousTotalWishes = 0;
 
     // ----- FIREBASE / MOCK BACKEND LOGIC -----
-    // Replace with your real Firebase config object
     const firebaseConfig = {
-      apiKey: "YOUR_API_KEY_HERE",
-      projectId: "your-project",
-      // ...
+      apiKey: "AIzaSyBwqOTIjHlPIjzYODzp7vaa6yXewBhgV-c",
+      authDomain: "wedding-3c701.firebaseapp.com",
+      projectId: "wedding-3c701",
+      storageBucket: "wedding-3c701.firebasestorage.app",
+      messagingSenderId: "257406049301",
+      appId: "1:257406049301:web:39c9fb95599364e499821c",
+      measurementId: "G-GDNHF06WE7"
     };
 
-    // We use a mock backend backed by localStorage if the API key isn't set
-    const isMock = firebaseConfig.apiKey === "YOUR_API_KEY_HERE";
-    
-    // For live top-stacking, we trigger an event when data changes locally
-    const WISHES_STORAGE_KEY = "wedding-wishes-db";
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
 
-    function fetchWishesFromDB() {
-      if (isMock) {
-        return JSON.parse(localStorage.getItem(WISHES_STORAGE_KEY) || "[]");
+    async function saveWishToDB(wish) {
+      try {
+        await addDoc(collection(db, "wishes"), {
+          name: wish.name,
+          message: wish.message,
+          sentAt: serverTimestamp()
+        });
+      } catch (e) {
+        console.error("Error adding document: ", e);
       }
-      // Real firebase query would go here
-      return [];
-    }
-
-    function saveWishToDB(wish) {
-      if (isMock) {
-        const wishes = fetchWishesFromDB();
-        wishes.unshift(wish); // newest first
-        localStorage.setItem(WISHES_STORAGE_KEY, JSON.stringify(wishes));
-        // Trigger a storage event manually for the current tab, 
-        // real storage events only trigger on OTHER tabs
-        window.dispatchEvent(new Event('mock-snapshot'));
-      }
-      // Real Firebase addDoc would go here
     }
 
     function listenToWishes(callback) {
-      if (isMock) {
-        const handler = () => {
-          callback(fetchWishesFromDB());
-        };
-        // Listen to changes from this tab
-        window.addEventListener('mock-snapshot', handler);
-        // Listen to changes from other tabs
-        window.addEventListener('storage', (e) => {
-          if (e.key === WISHES_STORAGE_KEY) handler();
+      const q = query(collection(db, "wishes"), orderBy("sentAt", "desc"));
+      onSnapshot(q, (querySnapshot) => {
+        const wishes = [];
+        querySnapshot.forEach((doc) => {
+          const data = doc.data();
+          wishes.push({
+            name: data.name,
+            message: data.message,
+            sentAt: data.sentAt ? data.sentAt.toDate().toISOString() : new Date().toISOString()
+          });
         });
-        
-        // Initial fetch
-        handler();
-      }
-      // Real Firebase onSnapshot would go here
+        callback(wishes);
+      });
     }
 
     // ----- UI RENDER LOGIC -----
