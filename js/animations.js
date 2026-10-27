@@ -26,7 +26,10 @@
     // Set up scroll reveals for sections and cards
     initScrollReveals(gsap, ScrollTrigger);
     
-    // Canvas scrolling animation removed, playing regular video instead
+    // Animate hero title directly on page load
+    if (window.animateHero) {
+      window.animateHero();
+    }
   });
 
   // Expose hero animator globally so script.js can trigger it when envelope is opened

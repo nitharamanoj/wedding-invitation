@@ -25,34 +25,6 @@
 <body>
   <!-- Ambient Falling Stars & Sparkles Field (Full Page) -->
   <div class="petal-field" id="petalField" aria-hidden="true"></div>
-  <!-- Luxury Ribbon Reveal (Entry Gate) -->
-  <div class="luxury-gate" id="luxuryGate">
-
-    <!-- Floating gold particles background -->
-    <div class="luxury-particles" id="luxuryParticles" aria-hidden="true"></div>
-
-    <!-- Monogram at top center (Removed as it is now in the letter image) -->
-
-    <!-- Instruction Text above knot -->
-    <div class="preloader-container">
-      <p class="instruction-text-standalone" id="instructionText">Click to open</p>
-      <div id="mediaLoader" class="media-loader">
-        <div class="loader-dot"></div>
-        <div class="loader-dot"></div>
-        <div class="loader-dot"></div>
-      </div>
-    </div>
-
-    <!-- Envelope Wrapper -->
-    <div class="envelope-wrapper-standalone" id="ribbonWrapper">
-      <div class="envelope-item" id="ribbonBow" aria-label="Click to open envelope"
-        style="height: auto; width: 340px; background: transparent; border: none; box-shadow: none;">
-        <img src="assets/images/letter.png" alt="Wedding Invitation Letter"
-          style="width: 100%; height: auto; border-radius: 8px; box-shadow: 0 12px 35px rgba(90, 75, 60, 0.25); display: block;">
-      </div>
-    </div>
-
-  </div>
 
   <!-- Main 9:16 Portrait Card Frame -->
   <div class="card-frame" id="cardFrame">
@@ -188,7 +160,8 @@
             <h2 id="scrollSceneTitle">A Journey Together</h2>
             <div class="hairline-divider"><span class="diamond-glyph">♦</span></div>
           </div>
-          <video class="hero-video" id="journeyVideo" src="assets/videos/journey.mp4" poster="assets/images/pic1.jpg" loop muted playsinline webkit-playsinline preload="auto"></video>
+          <video class="hero-video" id="journeyVideo" src="assets/videos/journey.mp4" poster="assets/images/pic1.jpg"
+            loop muted playsinline webkit-playsinline preload="auto"></video>
         </div>
       </section>
 
@@ -216,12 +189,12 @@
           <div class="reception-schedule">
             <div class="reception-schedule-item">
               <span class="reception-schedule-label">GUESTS ARRIVE</span>
-              <span class="reception-schedule-time">10:30</span>
+              <span class="reception-schedule-time">11:00 AM</span>
             </div>
             <div class="reception-schedule-divider"></div>
             <div class="reception-schedule-item">
               <span class="reception-schedule-label">RECEPTION BEGINS</span>
-              <span class="reception-schedule-time">11:00</span>
+              <span class="reception-schedule-time">1:00 PM</span>
             </div>
           </div>
 
@@ -305,7 +278,8 @@
 
           <div class="detail-card venue-card reveal">
             <div class="map-frame">
-              <a href="https://www.google.com/maps/search/?api=1&query=St.+Mary%27s+Church%2C+Muruckasserry" target="_blank" rel="noopener" aria-label="Get directions to St. Mary's Church">
+              <a href="https://www.google.com/maps/search/?api=1&query=St.+Mary%27s+Church%2C+Muruckasserry"
+                target="_blank" rel="noopener" aria-label="Get directions to St. Mary's Church">
                 <img src="assets/images/st.marys church.jpg" alt="St. Mary's Church, Muruckasserry" loading="lazy">
               </a>
             </div>
@@ -332,19 +306,25 @@
             <!-- Frame 1 -->
             <div class="swiper-slide gallery-slide">
               <div class="photo-frame">
-                <img src="assets/images/pic1.jpg" alt="Captured Moment 1">
+                <img src="assets/images/pic5.jpeg" alt="Captured Moment 1">
               </div>
             </div>
             <!-- Frame 2 -->
             <div class="swiper-slide gallery-slide">
               <div class="photo-frame">
-                <img src="assets/images/pic2.jpg" alt="Captured Moment 2">
+                <img src="assets/images/pic4.jpeg" alt="Captured Moment 2" loading="lazy">
               </div>
             </div>
             <!-- Frame 3 -->
             <div class="swiper-slide gallery-slide">
               <div class="photo-frame">
-                <img src="assets/images/pic3.png" alt="Captured Moment 3">
+                <img src="assets/images/pic1.jpg" alt="Captured Moment 3" loading="lazy">
+              </div>
+            </div>
+            <!-- Frame 4 -->
+            <div class="swiper-slide gallery-slide">
+              <div class="photo-frame">
+                <img src="assets/images/pic2.jpg" alt="Captured Moment 4" loading="lazy">
               </div>
             </div>
           </div>
@@ -400,8 +380,9 @@
           <div class="wishes-display" id="wishesDisplay" aria-live="polite">
             <!-- Wishes will be injected here -->
           </div>
-          
-          <div class="wishes-load-more-container" id="loadMoreContainer" style="display: none; text-align: center; margin-top: 1.5rem;">
+
+          <div class="wishes-load-more-container" id="loadMoreContainer"
+            style="display: none; text-align: center; margin-top: 1.5rem;">
             <button type="button" class="btn btn-outline" id="loadMoreWishesBtn">Load More Wishes</button>
           </div>
         </div>
@@ -424,8 +405,8 @@
   <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
-  <script type="module" src="js/script.js?v=28"></script>
-  <script src="js/animations.js?v=17"></script>
+  <script type="module" src="js/script.js?v=29"></script>
+  <script src="js/animations.js?v=18"></script>
 </body>
 
 </html>

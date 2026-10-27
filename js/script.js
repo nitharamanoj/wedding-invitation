@@ -55,11 +55,18 @@ import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, serverTim
     const frame = document.querySelector(selectors.cardFrame);
     if (frame) {
       frame.scrollTop = 0;
-      frame.classList.add("is-locked");
     }
 
-    initMediaPreloader();
-    initLuxuryGate();
+    // Unlock audio on first user touch / click anywhere on page
+    const unlockAudio = () => {
+      startAudioPlayback();
+      ["click", "touchstart", "keydown"].forEach(e => document.removeEventListener(e, unlockAudio));
+    };
+    ["click", "touchstart", "keydown"].forEach(e => document.addEventListener(e, unlockAudio, { once: true }));
+
+    // Start auto-scroll after a short delay
+    setTimeout(() => startAutoScroll(), 3500);
+
     initCountdown();
     initCeremonyCountdown();
     initReceptionCountdown();
