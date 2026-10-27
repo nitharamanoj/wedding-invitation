@@ -520,32 +520,34 @@ section {
 }
 
 /* -------------------------------------------------------------
-   Music Button
+   Music Button & Hint
    ------------------------------------------------------------- */
 .music-button {
   position: absolute;
   top: 5rem;
   right: 1.6rem;
   z-index: 99;
-  width: 36px;
-  height: 36px;
+  width: 38px;
+  height: 38px;
   border-radius: 50%;
   border: 1px solid var(--color-glass-border);
   background-color: var(--color-glass-light);
   backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
   color: var(--color-gold-deep);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 0.85rem;
+  font-size: 0.88rem;
+  cursor: pointer;
   transition: all 0.3s ease;
-  box-shadow: 0 4px 10px rgba(58, 46, 38, 0.05);
+  box-shadow: 0 4px 12px rgba(58, 46, 38, 0.08);
 }
 
 .music-button:hover {
   background-color: var(--color-paper);
   color: var(--color-gold);
-  transform: scale(1.05);
+  transform: scale(1.06);
 }
 
 .music-button.is-playing {
@@ -553,11 +555,53 @@ section {
   background-color: var(--color-paper);
   color: var(--color-gold-deep);
   border-color: var(--color-gold);
+  box-shadow: 0 0 12px rgba(212, 175, 55, 0.35);
 }
 
 @keyframes rotateMusic {
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
+}
+
+/* Floating Music Hint Tooltip (appears if initial autoplay is restricted by browser) */
+.music-hint {
+  position: absolute;
+  top: 5rem;
+  right: calc(1.6rem + 46px);
+  height: 38px;
+  display: flex;
+  align-items: center;
+  z-index: 99;
+  background: rgba(44, 38, 34, 0.88);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  color: #FDFBF7;
+  padding: 0 14px;
+  border-radius: 19px;
+  font-family: var(--font-body);
+  font-size: 0.72rem;
+  font-weight: 400;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateX(6px);
+  transition: opacity 0.4s ease, transform 0.4s ease, visibility 0.4s ease;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(212, 175, 55, 0.35);
+}
+
+.music-hint.is-visible {
+  opacity: 1;
+  visibility: visible;
+  transform: translateX(0);
+  animation: hintPulse 2.4s infinite ease-in-out;
+}
+
+@keyframes hintPulse {
+  0%, 100% { transform: translateX(0); }
+  50% { transform: translateX(-4px); }
 }
 
 /* -------------------------------------------------------------

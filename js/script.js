@@ -21,6 +21,7 @@ import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, serverTim
     petalField: "#petalField",
     siteHeader: "#siteHeader",
     musicToggle: "#musicToggle",
+    musicHint: "#musicHint",
     bgMusic: "#bgMusic",
     days: "#days",
     hours: "#hours",
@@ -56,13 +57,6 @@ import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, serverTim
     if (frame) {
       frame.scrollTop = 0;
     }
-
-    // Unlock audio on first user touch / click anywhere on page
-    const unlockAudio = () => {
-      startAudioPlayback();
-      ["click", "touchstart", "keydown"].forEach(e => document.removeEventListener(e, unlockAudio));
-    };
-    ["click", "touchstart", "keydown"].forEach(e => document.addEventListener(e, unlockAudio, { once: true }));
 
     // Start auto-scroll after a short delay
     setTimeout(() => startAutoScroll(), 3500);
@@ -462,57 +456,94 @@ import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, serverTim
   }
 
   /* -------------------------------------------------------------
-     Music Player — uses new Audio() for maximum browser compatibility
+     Music Player — Universal Autoplay with Zero-Delay Gesture Fallback
      ------------------------------------------------------------- */
   let bgAudio = null;
+  let autoplayListenersAttached = false;
+  let hintTimeout = null;
+
+  function unlockWebAudio() {
+    try {
+      const AudioCtx = window.AudioContext || window.webkitAudioContext;
+      if (AudioCtx) {
+        if (!window.__weddingAudioCtx) {
+          window.__weddingAudioCtx = new AudioCtx();
+        }
+        if (window.__weddingAudioCtx.state === "suspended") {
+          window.__weddingAudioCtx.resume();
+        }
+      }
+    } catch (_) {}
+  }
 
   function getBgAudio() {
     if (!bgAudio) {
-      bgAudio = new Audio("assets/music/song.mp4");
-      bgAudio.loop   = true;
+      const domAudio = document.querySelector(selectors.bgMusic);
+      if (domAudio) {
+        bgAudio = domAudio;
+      } else {
+        bgAudio = new Audio("assets/music/song.mp3");
+      }
+      bgAudio.loop = true;
       bgAudio.volume = 1.0;
       bgAudio.preload = "auto";
-      bgAudio.addEventListener("ended", () => setMusicButtonState(false));
+
+      bgAudio.addEventListener("play", () => {
+        setMusicButtonState(true);
+        hideMusicHint();
+        removeAutoPlayListeners();
+      });
+      bgAudio.addEventListener("pause", () => {
+        setMusicButtonState(false);
+      });
+      bgAudio.addEventListener("ended", () => {
+        setMusicButtonState(false);
+      });
       bgAudio.addEventListener("error", (e) => {
-        console.error("Audio load error:", e);
-        showToast("Could not load music file.");
+        console.warn("Background audio notice:", e);
       });
     }
     return bgAudio;
   }
 
-  function initMusic() {
-    const button = document.querySelector(selectors.musicToggle);
-    if (!button) return;
-
-    button.addEventListener("click", () => {
-      const audio = getBgAudio();
-      if (audio.paused) {
-        startAudioPlayback();
-      } else {
-        pauseAudioPlayback();
-      }
-    });
-  }
-
-  function startAudioPlayback() {
+  function startAudioPlayback(isUserTriggered = false) {
     const audio = getBgAudio();
+    if (!audio) return Promise.resolve(false);
+
+    if (!audio.paused) {
+      setMusicButtonState(true);
+      hideMusicHint();
+      return Promise.resolve(true);
+    }
+
+    unlockWebAudio();
+    audio.muted = false;
+    audio.volume = 1.0;
+
     const playPromise = audio.play();
     if (playPromise !== undefined) {
-      playPromise
+      return playPromise
         .then(() => {
           setMusicButtonState(true);
+          hideMusicHint();
+          removeAutoPlayListeners();
+          return true;
         })
         .catch((err) => {
-          console.error("Audio play failed:", err);
-          showToast("Tap the music button to play.");
+          if (isUserTriggered) {
+            console.warn("Manual audio play prevented:", err);
+            showToast("Tap again to play music.");
+          }
+          return false;
         });
     }
+    return Promise.resolve(true);
   }
 
   function pauseAudioPlayback() {
-    if (bgAudio) {
-      bgAudio.pause();
+    const audio = getBgAudio();
+    if (audio) {
+      audio.pause();
     }
     setMusicButtonState(false);
   }
@@ -526,6 +557,91 @@ import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, serverTim
     button.innerHTML = isPlaying
       ? `<i class="fa-solid fa-volume-high"></i>`
       : `<i class="fa-solid fa-music"></i>`;
+  }
+
+  function showMusicHint() {
+    const hint = document.querySelector(selectors.musicHint);
+    if (hint) hint.classList.add("is-visible");
+  }
+
+  function hideMusicHint() {
+    const hint = document.querySelector(selectors.musicHint);
+    if (hint) hint.classList.remove("is-visible");
+    if (hintTimeout) {
+      clearTimeout(hintTimeout);
+      hintTimeout = null;
+    }
+  }
+
+  function onFirstInteraction() {
+    unlockWebAudio();
+    startAudioPlayback(false).then((started) => {
+      if (started) {
+        removeAutoPlayListeners();
+      }
+    });
+  }
+
+  function removeAutoPlayListeners() {
+    if (!autoplayListenersAttached) return;
+    autoplayListenersAttached = false;
+    const events = ["pointerdown", "touchstart", "touchend", "mousedown", "click", "keydown", "wheel", "scroll"];
+    events.forEach((evt) => {
+      window.removeEventListener(evt, onFirstInteraction, true);
+      document.removeEventListener(evt, onFirstInteraction, true);
+      const frame = document.querySelector(selectors.cardFrame);
+      if (frame) frame.removeEventListener(evt, onFirstInteraction, true);
+    });
+    if (hintTimeout) {
+      clearTimeout(hintTimeout);
+      hintTimeout = null;
+    }
+  }
+
+  function setupAutoplay() {
+    // 1. Immediate unmuted autoplay attempt
+    startAudioPlayback(false).then((started) => {
+      if (started) return;
+
+      // 2. If blocked by browser autoplay policy, attach universal gesture listeners
+      if (!autoplayListenersAttached) {
+        autoplayListenersAttached = true;
+        const events = ["pointerdown", "touchstart", "touchend", "mousedown", "click", "keydown", "wheel", "scroll"];
+        events.forEach((evt) => {
+          window.addEventListener(evt, onFirstInteraction, { capture: true, passive: true });
+          document.addEventListener(evt, onFirstInteraction, { capture: true, passive: true });
+          const frame = document.querySelector(selectors.cardFrame);
+          if (frame) frame.addEventListener(evt, onFirstInteraction, { capture: true, passive: true });
+        });
+
+        // 3. Show elegant hint after 2.5 seconds if still paused
+        hintTimeout = setTimeout(() => {
+          const audio = getBgAudio();
+          if (audio && audio.paused) {
+            showMusicHint();
+          }
+        }, 2500);
+      }
+    });
+  }
+
+  function initMusic() {
+    const button = document.querySelector(selectors.musicToggle);
+    if (button) {
+      button.addEventListener("click", (e) => {
+        e.stopPropagation();
+        const audio = getBgAudio();
+        if (audio.paused) {
+          startAudioPlayback(true);
+        } else {
+          pauseAudioPlayback();
+        }
+      });
+    }
+
+    // Run autoplay setup
+    setupAutoplay();
+    window.addEventListener("load", () => setupAutoplay(), { once: true });
   }
 
 

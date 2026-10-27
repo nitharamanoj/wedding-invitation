@@ -19,7 +19,7 @@
   <!-- Icon Libraries & Swiper -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css">
-  <link rel="stylesheet" href="css/style.css?v=27">
+  <link rel="stylesheet" href="css/style.css?v=28">
 </head>
 
 <body>
@@ -56,11 +56,37 @@
       </nav>
     </header>
 
-    <!-- Music Player Toggler -->
+    <!-- Music Player Toggler & Audio Autoplay -->
+    <span class="music-hint" id="musicHint" aria-hidden="true">Tap for music ♫</span>
     <button class="music-button" id="musicToggle" type="button" aria-label="Play background music">
       <i class="fa-solid fa-music"></i>
     </button>
-    <!-- bgMusic is created dynamically in script.js -->
+    <audio id="bgMusic" loop preload="auto" playsinline webkit-playsinline>
+      <source src="assets/music/song.mp3" type="audio/mpeg">
+      <source src="assets/music/song.m4a" type="audio/mp4">
+      <source src="assets/music/song.mp4" type="audio/mp4">
+    </audio>
+    <script>
+      // Immediate autoplay attempt as early as possible during HTML parse
+      (function() {
+        var audio = document.getElementById('bgMusic');
+        if (audio) {
+          audio.volume = 1.0;
+          var p = audio.play();
+          if (p !== undefined) {
+            p.then(function() {
+              var btn = document.getElementById('musicToggle');
+              if (btn) {
+                btn.classList.add('is-playing');
+                btn.innerHTML = '<i class="fa-solid fa-volume-high"></i>';
+              }
+            }).catch(function() {
+              // Silently caught if browser enforces interaction gesture requirement
+            });
+          }
+        }
+      })();
+    </script>
 
     <!-- Content Sections -->
     <main>
@@ -405,7 +431,7 @@
   <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
-  <script type="module" src="js/script.js?v=29"></script>
+  <script type="module" src="js/script.js?v=30"></script>
   <script src="js/animations.js?v=18"></script>
 </body>
 
